@@ -158,6 +158,10 @@
     background:radial-gradient(ellipse 100% 70% at 50% 30%, #3a2130 0%, #140a12 55%, #000 100%);
   }
 
+  #pageCount{
+    background:radial-gradient(ellipse 100% 70% at 50% 22%, #1d2033 0%, #090a12 55%, #000 100%);
+  }
+
   /* ---------- page 1 : teaser ---------- */
 
   .teaser-text{
@@ -243,6 +247,106 @@
 
   .sweet-line.show{ opacity:1; transform:translateY(0); }
   .sweet-line:last-child{ color:var(--rose-2); }
+
+.count-hero{
+  font-family:'Cormorant Garamond', serif;
+  font-weight:500;
+  font-size:clamp(4.2rem, 21vw, 8.6rem);
+  line-height:.9;
+  color:var(--gold-2);
+  text-shadow:0 0 34px rgba(217,180,121,.22);
+}
+.count-word{
+  font-family:'Cormorant Garamond', serif;
+  font-style:italic;
+  font-size:clamp(1.1rem, 3vw, 1.35rem);
+  color:var(--cream);
+  margin-top:10px;
+}
+.count-row{
+  display:flex;
+  gap:26px;
+  justify-content:center;
+  margin-top:26px;
+}
+.count-cell{ min-width:58px; }
+.count-cell b{
+  display:block;
+  font-family:'Cormorant Garamond', serif;
+  font-weight:500;
+  font-size:1.7rem;
+  color:var(--cream);
+}
+.count-cell span{
+  display:block;
+  font-size:.56rem;
+  letter-spacing:.26em;
+  margin-left:.26em;
+  color:var(--gold);
+  opacity:.75;
+  margin-top:4px;
+  text-transform:uppercase;
+}
+.count-note{
+  font-family:'Cormorant Garamond', serif;
+  font-style:italic;
+  font-size:clamp(1rem, 2.6vw, 1.15rem);
+  color:var(--muted);
+  max-width:34ch;
+  line-height:1.7;
+  margin-top:30px;
+}
+
+.overline{
+  font-size:.62rem;
+  letter-spacing:.34em;
+  margin-left:.34em;
+  color:var(--gold);
+  opacity:.8;
+  text-transform:uppercase;
+}
+
+.rule{
+  width:74px; height:1px;
+  margin:18px auto;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  flex:0 0 auto;
+}
+.rule.tight{ margin:12px auto 20px; }
+
+.btn-quiet{
+  position:relative;
+  margin-top:4.5vh;
+  padding:12px 27px;
+  border:0;
+  background:transparent;
+  color:var(--gold-2);
+  font-size:.68rem;
+  letter-spacing:.24em;
+  text-transform:uppercase;
+  cursor:pointer;
+  flex:0 0 auto;
+  transition:color .3s ease, transform .3s ease;
+}
+.btn-quiet::before,
+.btn-quiet::after{
+  content:"";
+  position:absolute;
+  top:50%;
+  width:34px; height:1px;
+  background:linear-gradient(90deg,transparent,rgba(217,180,121,.65));
+}
+.btn-quiet::before{ right:100%; }
+.btn-quiet::after{ left:100%; transform:rotate(180deg); }
+.btn-quiet b{
+  display:inline-block;
+  margin-left:9px;
+  font-size:1rem;
+  font-weight:400;
+  transition:transform .35s ease;
+}
+.btn-quiet:hover{ color:var(--rose-2); transform:translateY(-2px); }
+.btn-quiet:hover b{ transform:rotate(90deg); }
 
   /* ---------- page 3 : memories (photo stack) ---------- */
 
@@ -963,7 +1067,26 @@
       <div id="sweetLines"></div>
     </div>
 
-    <button class="next-btn" id="toPage3">Next</button>
+    <button class="next-btn" id="toCount">Next</button>
+  </section>
+
+  <!-- ================= 3 · DAYS TOGETHER ================= -->
+  <section class="page" id="pageCount">
+    <p class="overline">TOGETHER FOR</p>
+    <div class="rule tight"></div>
+
+    <p class="count-hero" id="countDays">0</p>
+    <p class="count-word">days of you and me</p>
+
+    <div class="count-row">
+      <div class="count-cell"><b id="countH">0</b><span>hours</span></div>
+      <div class="count-cell"><b id="countM">0</b><span>minutes</span></div>
+      <div class="count-cell"><b id="countS">0</b><span>seconds</span></div>
+    </div>
+
+    <p class="count-note">And somehow it still feels like we are only at the beginning of it.</p>
+
+    <button class="btn-quiet" id="toPage3fromCount"><span>SOME OF IT, IN PICTURES</span><b>&#9826;</b></button>
   </section>
 
   <!-- ================= PAGE 3 : MEMORIES ================= -->
@@ -1278,12 +1401,46 @@
 
   });
 
-  document.getElementById('toPage3').addEventListener('click', function(){ goTo('page3'); });
+  document.getElementById('toCount').addEventListener('click', function(){
+    goTo('pageCount');
+    startCounter();
+  });
+  document.getElementById('toPage3fromCount').addEventListener('click', function(){ goTo('page3'); });
   document.getElementById('toPage4').addEventListener('click', function(){
     goTo('page4');
     requestAnimationFrame(layoutSlingshot);
 
   });
+
+
+  /* ============================================================
+     3. DAYS TOGETHER
+     ============================================================ */
+  /* the day it all started — change if you'd rather count from elsewhere */
+  const START_DATE = new Date(2025, 8, 19, 0, 0, 0);
+
+  let counterTimer = null;
+
+  function startCounter(){
+    if(counterTimer) return;
+    tickCounter();
+    counterTimer = setInterval(tickCounter, 1000);
+  }
+
+  function tickCounter(){
+    let ms = Date.now() - START_DATE.getTime();
+    if(ms < 0) ms = 0;
+
+    const days = Math.floor(ms / 86400000);
+    const hrs  = Math.floor(ms / 3600000) % 24;
+    const mins = Math.floor(ms / 60000) % 60;
+    const secs = Math.floor(ms / 1000) % 60;
+
+    document.getElementById('countDays').textContent = days;
+    document.getElementById('countH').textContent = String(hrs).padStart(2,'0');
+    document.getElementById('countM').textContent = String(mins).padStart(2,'0');
+    document.getElementById('countS').textContent = String(secs).padStart(2,'0');
+  }
 
   /* ============================================================
      1b. PAGE 3 — photo stack: tap to reveal caption on mobile
@@ -1311,9 +1468,9 @@
 
   const sweetLines = [
 
-    "I asked you to be my girl, and to build a future with me.",
-    "Thordi si nokh-jhok ke baad you walked in my life... being brilliant, funny, and endlessly loving...",
-    "Thank you for making the ordinary days magical, and for choosing me over and over again.",
+    "A year ago, on an ordinary September's afternoon, that i clearly remember, I asked you to be mine... and you said yes to a whole future with me.",
+    "Somewhere between the late night calls and the silly fights, you became my favourite person (over and over again) and my calmest place, both at once.",
+    "Thank you for making the ordinary days feel magical and thankyou for choosing me, over and over, on the easy days and the difficult ones.",
     "Here's to us, and to every 19th of September still to come. I love you, Khushii (My K)."
 
   ];
